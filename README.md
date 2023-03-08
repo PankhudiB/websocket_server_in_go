@@ -1,3 +1,13 @@
+##Basic golang websocket server 
+
+Steps to run: 
+```
+go get .
+go run .
+```
+
+------------------------------------------------
+
 ## WebSockets Server in Go: A hijackers' perspective
 ![img_11.png](images/img_11.png)
 
