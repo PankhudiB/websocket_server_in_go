@@ -1,6 +1,7 @@
 package main
 
 import (
+	"encoding/json"
 	"fmt"
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
@@ -13,7 +14,6 @@ func main() {
 	fmt.Println("Starting WebSocket Server...")
 
 	httpEngine.GET("/talk-to-server", handleWebsocket)
-	fmt.Println()
 	fmt.Println()
 
 	err := http.ListenAndServe(":8080", httpEngine)
@@ -30,11 +30,31 @@ func handleWebsocket(context *gin.Context) {
 		fmt.Println("Error upgrading connection !", err.Error())
 	}
 
-	_, message, _ := websocketConn.ReadMessage()
-	fmt.Println("Message: ", string(message))
+	messageA := MessageWrapper{
+		MessageType:   "A",
+		MessageType_A: MessageType_A{Name: "Pankhudi", Place: "India"},
+	}
 
-	err = websocketConn.WriteMessage(websocket.TextMessage, []byte("Hello from server!\n"))
+	bytes, err := json.Marshal(messageA)
+
+	fmt.Println("Sending bytes :", string(bytes))
+	err = websocketConn.WriteMessage(websocket.TextMessage, bytes)
 	if err != nil {
 		fmt.Println("Error writing to ws connection !", err.Error())
 	}
+}
+
+type MessageType_A struct {
+	Name  string `json:"name"`
+	Place string `json:"place"`
+}
+
+type MessageType_B struct {
+	Animal string `json:"animal"`
+	Thing  string `json:"thing"`
+}
+
+type MessageWrapper struct {
+	MessageType   string `json:"message_type"`
+	MessageType_A `json:"content"`
 }
