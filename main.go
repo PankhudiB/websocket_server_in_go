@@ -6,6 +6,7 @@ import (
 	"github.com/gin-gonic/gin"
 	"github.com/gorilla/websocket"
 	"net/http"
+	"websocket-server/model"
 )
 
 func main() {
@@ -30,31 +31,19 @@ func handleWebsocket(context *gin.Context) {
 		fmt.Println("Error upgrading connection !", err.Error())
 	}
 
-	messageA := MessageWrapper{
+	if write(websocketConn) != nil {
+		fmt.Println("Error writing to ws connection !", write(websocketConn).Error())
+	}
+}
+
+func write(websocketConn *websocket.Conn) error {
+	messageA := model.MessageWrapper{
 		MessageType:   "A",
-		MessageType_A: MessageType_A{Name: "Pankhudi", Place: "India"},
+		MessageType_A: model.MessageType_A{Name: "Pankhudi", Place: "India"},
 	}
-
 	bytes, err := json.Marshal(messageA)
-
-	fmt.Println("Sending bytes :", string(bytes))
-	err = websocketConn.WriteMessage(websocket.TextMessage, bytes)
 	if err != nil {
-		fmt.Println("Error writing to ws connection !", err.Error())
+		return err
 	}
-}
-
-type MessageType_A struct {
-	Name  string `json:"name"`
-	Place string `json:"place"`
-}
-
-type MessageType_B struct {
-	Animal string `json:"animal"`
-	Thing  string `json:"thing"`
-}
-
-type MessageWrapper struct {
-	MessageType   string `json:"message_type"`
-	MessageType_A `json:"content"`
+	return websocketConn.WriteMessage(websocket.TextMessage, bytes)
 }
